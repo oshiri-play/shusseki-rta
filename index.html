@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171c2b">
+  <title>出席RTA</title>
+  <meta name="description" content="授業は聞かなくていい。出席だけは取れ。60秒の数字早打ちブラウザゲーム。">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="assets/three.min.js" defer></script>
+  <script src="models.js" defer></script>
+  <script src="world.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main id="app" class="app" data-screen="title">
+    <header class="topbar">
+      <button class="brand" id="home" type="button" aria-label="タイトル画面に戻る"><img src="assets/icon.svg" width="27" height="27" alt="">出席RTA</button>
+      <button id="mute" type="button" class="mute" aria-pressed="false">音声 ON</button>
+    </header>
+
+    <section id="hud" class="hud" aria-label="プレイ状況" hidden>
+      <div class="clock"><span>残り時間</span><strong id="clock">60.0</strong><small>秒</small></div>
+      <div><span>出席成功</span><strong id="score">0</strong><small>回</small></div>
+      <div><span>入力ミス</span><strong id="misses">0</strong><small>回</small></div>
+    </section>
+
+    <section id="classroom" class="classroom" aria-label="講義室" data-mood="stern">
+      <canvas id="world" aria-hidden="true"></canvas>
+      <div class="monitor" id="monitor" data-mode="title">
+        <div class="monitor-screen">
+          <div class="monitor-top" id="monitor-label">講義資料</div>
+          <div class="monitor-body" id="monitor-content">
+            <div class="opening-slide">
+              <strong>本日の成績評価</strong>
+              <div>出席回数：100％</div>
+              <div>授業の理解度：0％</div>
+            </div>
+          </div>
+          <div id="window-track" class="window-track" hidden><div id="window-fill"></div></div>
+        </div>
+      </div>
+
+      <p id="subtitle" class="subtitle" aria-live="polite" hidden></p>
+      <p class="speech" id="speech" aria-live="polite" hidden></p>
+      <div id="countdown" class="countdown" aria-live="polite" hidden></div>
+      <div id="opening-actions" class="opening-actions" hidden>
+        <button class="skip" id="ready" type="button">スキップ</button>
+      </div>
+
+      <section id="controls" class="controls" aria-label="スマートフォンの数字入力" hidden>
+        <div class="phone-status">
+          <span>出席入力</span>
+          <span class="phone-receiver" aria-hidden="true"></span>
+          <span class="battery" aria-hidden="true"></span>
+        </div>
+        <div class="answer">
+          <output id="input-view" aria-label="入力中の数字">··· ··· ···</output>
+          <span id="input-count">0 / 9</span>
+        </div>
+        <div class="keypad" id="keypad">
+          <button data-digit="1" type="button">1</button>
+          <button data-digit="2" type="button">2</button>
+          <button data-digit="3" type="button">3</button>
+          <button data-digit="4" type="button">4</button>
+          <button data-digit="5" type="button">5</button>
+          <button data-digit="6" type="button">6</button>
+          <button data-digit="7" type="button">7</button>
+          <button data-digit="8" type="button">8</button>
+          <button data-digit="9" type="button">9</button>
+          <button id="erase" class="erase" type="button">⌫ 削除</button>
+          <button data-digit="0" type="button">0</button>
+          <button id="submit" class="submit" type="button" disabled>提出</button>
+        </div>
+        <div id="phone-wifi" class="phone-overlay" role="status" hidden>
+          <div class="wifi-spinner" aria-hidden="true"></div>
+          <strong>学内Wi-Fiに接続中…</strong>
+          <span>通信状況が不安定です</span>
+        </div>
+        <div id="grade-notice" class="phone-overlay" role="status" hidden>
+          <div class="notice-envelope" aria-hidden="true"></div>
+          <strong>成績通知が届きました</strong>
+          <span>教務システム</span>
+        </div>
+      </section>
+    </section>
+
+    <section id="title-actions" class="title-actions">
+      <div class="title-copy">
+        <h1 class="game-title">出席<span>RTA</span></h1>
+        <p class="tagline">授業は聞かなくていい。出席だけは取れ。</p>
+      </div>
+      <div class="lobby-actions">
+        <div class="best-strip"><span>自己ベスト</span><strong id="title-best">―</strong></div>
+        <button class="button primary" id="start" type="button">ゲームスタート</button>
+        <button class="button secondary" id="help-open" type="button">遊び方</button>
+      </div>
+    </section>
+
+    <section id="result" class="result" hidden>
+      <article class="report">
+        <header class="report-head"><p>出席RTA</p><h2 id="result-heading" tabindex="-1">成績通知書</h2></header>
+        <div class="grade-row">
+          <div class="grade-stamp"><small>評価</small><strong id="grade">F</strong></div>
+          <div><div class="label">称号</div><h3 id="rank"></h3><p id="record" class="record" hidden>自己ベスト更新！</p></div>
+        </div>
+        <dl class="results-grid">
+          <div><dt>出席成功</dt><dd id="result-score"></dd></div>
+          <div><dt>入力ミス</dt><dd id="result-misses"></dd></div>
+          <div><dt>平均入力時間</dt><dd id="result-average"></dd></div>
+          <div><dt>自己ベスト</dt><dd id="result-best"></dd></div>
+        </dl>
+        <blockquote class="report-comment"><span>教授の講評</span><p id="result-comment"></p></blockquote>
+      </article>
+      <div class="result-actions">
+        <button class="button primary" id="retry" type="button">もう一度履修する</button>
+        <a class="button secondary" id="share" target="_blank" rel="noopener noreferrer">Xで友達に挑戦状を送る</a>
+        <button class="button secondary save" id="save" type="button">成績画像を保存</button>
+      </div>
+    </section>
+
+    <footer id="disclaimer">本作品は非公式のフィクションであり、実在する出席確認サービスとは関係ありません</footer>
+  </main>
+
+  <dialog id="help" aria-labelledby="help-title">
+    <h2 id="help-title">遊び方</h2>
+    <ol>
+      <li>モニターに出る9桁をテンキーで入力して「提出」。先頭の0も入力します。</li>
+      <li>正解で出席1回。入力ミスは再提出できます。受付ゲージが切れると次の番号に変わります。</li>
+      <li><span id="help-time">60</span>秒で何回出席できるか勝負。終盤ほど受付時間が短くなります。</li>
+    </ol>
+    <p>PCは数字キー・Backspace・Enterでも操作できます。</p>
+    <form method="dialog"><button class="button primary" type="submit">閉じる</button></form>
+  </dialog>
+</body>
+</html>
